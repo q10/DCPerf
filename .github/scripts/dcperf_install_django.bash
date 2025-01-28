@@ -31,4 +31,8 @@ install_django () {
   fi
 
   echo "[TEST] TODO: Implement This!"
+  # benchpress install tao_bench_64g
+
+(exec_with_retries 3 conda run ${env_prefix} python benchpress/cli/main.py install \
+    tao_bench_64g ) || return 1
 }

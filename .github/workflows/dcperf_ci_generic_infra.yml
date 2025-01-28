@@ -54,7 +54,7 @@ jobs:
 
     steps:
     - name: Setup Build Container
-      run: apt update -y; apt install -y git pciutils socat sudo wget
+      run: apt update -y; apt install -y build-essential git pciutils socat sudo wget
 
     - name: Checkout the Repository
       uses: actions/checkout@v4
@@ -72,6 +72,9 @@ jobs:
 
     - name: Create Conda Environment
       run: . $PRELUDE; create_conda_environment $BUILD_ENV ${{ matrix.python-version }}
+
+    - name: Install Python Tools
+      run: . $PRELUDE; install_build_tools $BUILD_ENV
 
     - name: Install Django
       run: . $PRELUDE; install_django $BUILD_ENV

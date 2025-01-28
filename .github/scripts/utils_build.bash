@@ -325,55 +325,20 @@ install_build_tools () {
 
   # shellcheck disable=SC2155
   local env_prefix=$(env_name_or_prefix "${env_name}")
-
   echo "[INSTALL] Installing build tools ..."
-  # NOTES:
-  #
-  # - Only the openblas package will install <cblas.h> directly into
-  #   $CONDA_PREFIX/include directory, which is required for FBGEMM tests
-  #
-  # - ncurses is needed to silence libtinfo6.so errors for ROCm+Clang builds
-  # - rhash is needed bc newer versions of GXX package don't come packaged with this library anymore
-  #
+
   # shellcheck disable=SC2086
   (exec_with_retries 3 conda install ${env_prefix} -c conda-forge --override-channels -y \
-    auditwheel \
-    bazel \
     click \
-    'cmake>=3.30' \
-    hypothesis \
-    jinja2 \
-    make \
-    ncurses \
-    ninja \
-    openblas \
-    patchelf \
-    rhash \
-    scikit-build \
-    wheel) || return 1
+    numpy \
+    pandas \
+    pyyaml \
+    tabulate) || return 1
 
-  echo "[INSTALL] Adding symlink librhash.so.0, which is needed by CMake ..."
-  # shellcheck disable=SC2155,SC2086
-  local conda_prefix=$(conda run ${env_prefix} printenv CONDA_PREFIX)
-  (print_exec ln -s "${conda_prefix}/lib/librhash.so" "${conda_prefix}/lib/librhash.so.0") || return 1
-
-  # For some reason, the build package for Python 3.12+ is missing from conda,
-  # so we have to install through pip instead.
-  #
-  # LibMambaUnsatisfiableError: Encountered problems while solving:
-  #   - package build-0.10.0-py310h06a4308_0 requires python >=3.10,<3.11.0a0, but none of the providers can be installed
-  #
-  # shellcheck disable=SC2086
-  (exec_with_retries 3 conda run ${env_prefix} pip install \
-    build) || return 1
-
-  # Check binaries are visible in the PAATH
-  (test_binpath "${env_name}" make) || return 1
-  (test_binpath "${env_name}" cmake) || return 1
-  (test_binpath "${env_name}" ninja) || return 1
+  conda run ${env_prefix} pip install -e benchpress/
 
   # Check Python packages are importable
-  local import_tests=( click hypothesis jinja2 skbuild wheel )
+  local import_tests=( click numpy pandas tabulate )
   for p in "${import_tests[@]}"; do
     (test_python_import_package "${env_name}" "${p}") || return 1
   done
