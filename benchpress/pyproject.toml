@@ -143,7 +143,7 @@ test = ["pytest"]
 
 # List URLs that are relevant to your project
 #
-#project.urls]
+[project.urls]
 "Homepage" = "https://github.com/facebookresearch/DCPerf"
 "Source" = "https://github.com/facebookresearch/DCPerf"
 
